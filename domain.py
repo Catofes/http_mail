@@ -37,6 +37,28 @@ class RDomain:
         resp.status = falcon.HTTP_200
 
 
+class RDomainModify():
+    def __init__(self):
+        self.db = RDataBase()
+
+    @utils.require_codes_and_domain
+    def on_get(self, req, resp, domain_id):
+        result = self.db.query('SELECT id, name FROM virtual_domains WHERE id = %s;', (domain_id, ))
+        if not result:
+            raise RError(11)
+        req.context['result'] = {'result': result}
+        resp.status = falcon.HTTP_200
+
+
+    @utils.require_codes_and_domain
+    def on_delete(self, req, resp, domain_id):
+        result = self.db.execute("DELETE FROM virtual_users WHERE domain_id = %s;"
+                                 "DELETE FROM virtual_domains WHERE id = %s;",
+                                 (domain_id, domain_id))
+        if not result:
+            raise RError(18)
+        resp.status = falcon.HTTP_200
+
 
 
 
