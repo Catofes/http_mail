@@ -17,7 +17,7 @@ Every request need a url params "code" meaning invite code.
 
 ###invites
 
-url: /invites?code=123
+url: /invite?code=123
 
 #### method: GET
 
@@ -25,7 +25,7 @@ Check if invite code is right. If the code works it will return HTTP CODE at 200
 
 ###domains
 
-url: /domains?code=123
+url: /domain?code=123
 
 ####method: GET
 
@@ -47,6 +47,25 @@ request example:
 response example:
 
 	{"result": [{"id": 11, "name": "aaa.com"}]}
+
+
+###Domain Modify
+
+url: /domain/{domain_id}
+
+####method: GET
+
+List the Domain
+
+response exapmle:
+
+	{"result": [{"id": 9, "name": "aaa.com"}]}
+
+####method: DELETE
+
+Delete the domain and the user below to this domain
+
+HTTP CODE 200 will returned if everything worked.
 
 ###user
 

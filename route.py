@@ -18,9 +18,9 @@ domainsModify = domain.RDomainModify()
 users = user.RUser()
 usersModify = user.RUserModify()
 
-app.add_route('/invites', invites)
-app.add_route('/domains', domains)
-app.add_route('/domains/{domain_id}', domainsModify)
+app.add_route('/invite', invites)
+app.add_route('/domain', domains)
+app.add_route('/domain/{domain_id}', domainsModify)
 app.add_route('/user/{domain_id}', users)
 app.add_route('/user/{domain_id}/{user_id}', usersModify)
 
