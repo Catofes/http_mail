@@ -52,9 +52,8 @@ class RDomainModify():
 
     @utils.require_codes_and_domain
     def on_delete(self, req, resp, domain_id):
-        result = self.db.execute("DELETE FROM virtual_users WHERE domain_id = %s;"
-                                 "DELETE FROM virtual_domains WHERE id = %s;",
-                                 (domain_id, domain_id))
+        result = self.db.execute("DELETE FROM virtual_users WHERE domain_id = %s;",(domain_id,))
+        result = self.db.execute("DELETE FROM virtual_domains WHERE id = %s;",(domain_id,))
         if not result:
             raise RError(18)
         resp.status = falcon.HTTP_200
