@@ -11,17 +11,15 @@ class RDomain:
     def __init__(self):
         self.db = RDataBase()
 
-    @utils.require_codes
-    def on_get(self, req, resp):
-        code = req.params['code']
-        result = self.db.query("SELECT id, name FROM virtual_domains WHERE code = %s", (code,))
+    @utils.require_login
+    def on_get(self, req, resp, user):
+        result = self.db.query("SELECT id, name FROM virtual_domains WHERE admin_user_id = %s", (user.info.id,))
         req.context['result'] = {'result': result}
         resp.status = falcon.HTTP_200
 
 
-    @utils.require_codes
-    def on_post(self, req, resp):
-        code = req.params['code']
+    @utils.require_login
+    def on_post(self, req, resp, user):
         if 'request' not in req.context.keys():
             raise RError(16)
         request = req.context['request']
@@ -31,9 +29,10 @@ class RDomain:
             raise RError(8)
         if not re.match('^[a-zA-Z0-9][-a-zA-Z0-9]{0,62}\.[a-zA-Z0-9][-a-zA-Z0-9]{0,62}$', request['domain']):
             raise RError(9)
-        self.db.execute("INSERT INTO virtual_domains (name, code) VALUES (%s, %s)", (request['domain'], code))
+        self.db.execute("INSERT INTO virtual_domains (name, admin_user_id) VALUES (%s, %s)",
+                        (request['domain'], user.info.id))
         req.context['result'] = {'result': self.db.query('SELECT id, name FROM virtual_domains WHERE name = %s',
-                                                         (request['domain'],))}
+                                                         (request['domain'],))[0]}
         resp.status = falcon.HTTP_200
 
 
@@ -41,19 +40,21 @@ class RDomainModify():
     def __init__(self):
         self.db = RDataBase()
 
-    @utils.require_codes_and_domain
-    def on_get(self, req, resp, domain_id):
+    @utils.require_login
+    @utils.require_domain_owner
+    def on_get(self, req, resp, domain_id, user):
         result = self.db.query('SELECT id, name FROM virtual_domains WHERE id = %s;', (domain_id, ))
         if not result:
-            raise RError(11)
-        req.context['result'] = {'result': result}
+            raise RError(24)
+        req.context['result'] = {'result': result[0]}
         resp.status = falcon.HTTP_200
 
 
-    @utils.require_codes_and_domain
-    def on_delete(self, req, resp, domain_id):
-        result = self.db.execute("DELETE FROM virtual_users WHERE domain_id = %s;",(domain_id,))
-        result = self.db.execute("DELETE FROM virtual_domains WHERE id = %s;",(domain_id,))
+    @utils.require_login
+    @utils.require_domain_owner
+    def on_delete(self, req, resp, domain_id, user):
+        result = self.db.execute("DELETE FROM virtual_users WHERE domain_id = %s;", (domain_id,))
+        result = self.db.execute("DELETE FROM virtual_domains WHERE id = %s;", (domain_id,))
         if not result:
             raise RError(18)
         resp.status = falcon.HTTP_200

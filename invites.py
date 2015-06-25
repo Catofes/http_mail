@@ -8,9 +8,8 @@ from database import RDataBase
 
 class RInvites():
     def __init__(self):
-        self.db = RDataBase()
+        pass
 
-    @utils.require_codes
-    def on_get(self, req, resp):
+    @utils.require_codes(0)
+    def on_get(self, req, resp, code):
         resp.status = falcon.HTTP_200
-

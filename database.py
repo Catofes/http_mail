@@ -7,6 +7,7 @@ from singleton import Singleton
 from MySQLdb import cursors
 from config import RConfig
 
+
 class RDataBaseConnection:
     def __init__(self, db):
         self.db = db
@@ -31,6 +32,9 @@ class RDataBaseConnection:
 
 class RDataBase(Singleton):
     def __init__(self):
+        if hasattr(self, '_init'):
+            return
+        self._init = True
         config = RConfig()
         self._db_pool = PooledDB(MySQLdb,
                                  user=config.db_user,

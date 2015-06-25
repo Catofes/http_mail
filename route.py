@@ -6,6 +6,8 @@ from wsgiref import simple_server
 from invites import RInvites
 import domain
 import user
+import account
+
 app = falcon.API(middleware=[
     middleware.RequireJSON(),
     middleware.JSONTranslator()
@@ -17,8 +19,13 @@ domains = domain.RDomain()
 domainsModify = domain.RDomainModify()
 users = user.RUser()
 usersModify = user.RUserModify()
+login = account.RLogin()
+register = account.RRegister()
+
 
 app.add_route('/invite', invites)
+app.add_route('/login', login)
+app.add_route('/register', register)
 app.add_route('/domain', domains)
 app.add_route('/domain/{domain_id}', domainsModify)
 app.add_route('/user/{domain_id}', users)
