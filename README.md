@@ -156,5 +156,35 @@ The first number in this api means domain id and the second one means user id.
     DELETE: /user/18/20?token=865d54814424abbe
     
 
+###Servers
 
+Show all the mail servers in the system. 
+
+    #List all servers
+    GET:    /server?token=b5f1147824e37b8b
+    RESP:   {"result": [{"default_mark": "0default", "server_mark": "CNAL", "domain_name": "a.b.com", "region_mark": "3CN"}]
+    
+
+###DKIM Settings
+
+You can bind your dkim key to a domain. You can add one or replace one. The first number in this api is domain id. When you query your record, not key but sha512(key) will returned.
+
+    #List a dkim record
+    GET:    /dkim/1?token=b5f1147824e37b8b
+    RESP:   {"key_sha512": "17979e1de7dc2574cc2113a452871e155c78997bd90ae4d03e86ee3d1b210938bc8f0c4f046e0fd715140d026d59c093e6e28a89f2dbed11b1fc3a426e1e832f", "domain": "a.com", "selector": "tau"}
+
+    #Put a dkim record. If you already have one, this api will replace it.
+    PUT:    /dkim/1?token=b5f1147824e37b8b
+    BODY:   {"selector":"ppp", "private_key":"xxx"}
+    
+   
+###BCC Settings
+
+Show the BCC settings of the mail server. You need level upon 5. Please read postfix manual before add record. 
+
+
+###Alias Settings
+
+
+###Transport Settings
 
