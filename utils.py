@@ -51,6 +51,19 @@ def require_domain_owner(func):
 
     return check_owner
 
+def require_level(level=0):
+    def dec(func):
+        def check_login(*args, **kwargs):
+            if 'user' not in kwargs.keys():
+                raise RError(22)
+            if kwargs['user'].info.level < level:
+                raise RError(27)
+            func(*args, **kwargs)
+
+        return check_login
+
+    return dec
+
 
 def generate_code(length):
     if length < 1:

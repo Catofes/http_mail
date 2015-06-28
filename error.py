@@ -55,6 +55,12 @@ Error_text = {
          falcon.HTTP_400],
     26: ["User Not Exist",
          falcon.HTTP_404],
+    27: ["Permission Deny",
+         falcon.HTTP_403],
+    28: ["Email Address Illegal",
+         falcon.HTTP_400],
+    29: ["Alias Not Exist",
+         falcon.HTTP_400],
 }
 
 

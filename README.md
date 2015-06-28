@@ -101,7 +101,7 @@ A token(16-char) will returned if you login successfully. The token will expired
     #Login
     POST:   /login
     BODY:   {"username":"catofes","password":"321"}
-    RESP:   {"token": "bd36d1ccb2884d6d"}
+    RESP:   {"token": "bd36d1ccb2884d6d","username":"catofes","level":1}
 
     #Logout
     DELETE: /login?token=1e987d1eba781730

@@ -26,7 +26,7 @@ class RLogin:
         user = RAdminUser()
         token = utils.generate_code(16)
         user.login_by_password(request['username'], request['password'], token)
-        req.context['result'] = {'token': token}
+        req.context['result'] = {'token': token, 'username': user.info.username, 'level': user.info.level}
 
     @utils.require_login
     def on_delete(self, req, resp, user):
