@@ -48,10 +48,11 @@ class RBccModify:
     @utils.require_login
     @utils.require_domain_owner
     def on_get(self, req, resp, user, domain_id, bcc_id):
-        result = self.db.query("SELECT id,source,destination,region FROM recipient_bcc WHERE id = %s AND domain_id = %s",
-                               (bcc_id, domain_id))
+        result = self.db.query(
+            "SELECT id,source,destination,region FROM recipient_bcc WHERE id = %s AND domain_id = %s",
+            (bcc_id, domain_id))
         if not result:
-            raise RError(29)
+            raise RError(32)
         req.context['result'] = {"result": result[0]}
 
     @utils.require_login

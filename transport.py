@@ -49,7 +49,7 @@ class RTransportModify:
             "SELECT id,source,destination,region FROM transport_domains WHERE id = %s AND domain_id = %s",
             (transport_id, domain_id))
         if not result:
-            raise RError(29)
+            raise RError(33)
         req.context['result'] = {"result": result[0]}
 
     @utils.require_login
@@ -92,4 +92,20 @@ class RTransportDefaultModify:
             request = req.context['request']
             if 'id' not in request.keys():
                 raise RError(20)
+            server = self.db.query("SELECT * FROM mynetworks WHERE id = %s", (req.context['id']), )
+            domain = self.db.query("SELECT * FROM virtual_domains WHERE id = %s", (domain_id,))
+            if not server:
+                raise RError(30)
+            cursor = self.db.begin()
+            cursor.execute("DELETE FROM transport_domains WHERE domain_id = %s", (domain_id,))
+            cursor.execute(
+                "INSERT INTO transport_domains(domain_id, source, destination, region) VALUES (%s, %s, %s, '0default')",
+                (domain_id, domain[0]['name'], "smtp:[" + server[0]['domain_name'] + "]"))
+            cursor.execute(
+                "INSERT INTO transport_domains(domain_id, source, destination, region) VALUES( %s, %s, %s, %s)",
+                (domain_id, domain[0]['name'], "lmtp:unix:private/dovecot-lmtp", server[0]['server_mark']))
+            cursor.commit()
+        else:
+            raise RError(31)
+
 

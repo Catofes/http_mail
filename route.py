@@ -34,6 +34,8 @@ r_bcc = bcc.RBcc()
 r_bccModify = bcc.RBccModify()
 r_transport = transport.RTransport()
 r_transportModify = transport.RTransportModify()
+r_transportDefault = transport.RTransportDefault()
+r_transportDefaultModify = transport.RTransportDefaultModify()
 
 app.add_route('/invite', r_invites)
 app.add_route('/login', r_login)
@@ -50,6 +52,8 @@ app.add_route('/bcc/{domain_id}', r_bcc)
 app.add_route('/bcc/{domain_id}/{bcc_id}', r_bccModify)
 app.add_route('/transport/{domain_id}', r_transport)
 app.add_route('/transport/{domain_id}/{transport_id}', r_transportModify)
+app.add_route('/transport_default/', r_transportDefault)
+app.add_route('/transport_default/{domain_id}', r_transportDefaultModify)
 
 if __name__ == '__main__':
     httpd = simple_server.make_server('127.0.0.1', 8000, app)
