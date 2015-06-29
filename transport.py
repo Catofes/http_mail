@@ -67,13 +67,12 @@ class RTransportDefault:
         self.db = RDataBase()
 
     @utils.require_login
-    @utils.require_domain_owner
-    def on_get(self, req, resp, user, domain_id):
+    def on_get(self, req, resp, user):
         result = {
             1: {
                 "Illustrate": "Relay all mail to one server and store in it. This is helpful when you want to add multi "
                               "servers in your mx record.",
-                "parameters": "You need a json context with you server id in it. Like {\"id\":1}"
+                "parameters": 'You need a json context with you server id in it. Like {"id":1}'
             }
         }
         req.context['result'] = {"result": result}
@@ -85,14 +84,14 @@ class RTransportDefaultModify:
 
     @utils.require_login
     @utils.require_domain_owner
-    def on_push(self, req, resp, user, domain_id, operate_id):
-        if operate_id == 1:
+    def on_post(self, req, resp, user, domain_id, operate_id):
+        if operate_id == "1":
             if 'request' not in req.context.keys():
                 raise RError(16)
             request = req.context['request']
             if 'id' not in request.keys():
                 raise RError(20)
-            server = self.db.query("SELECT * FROM mynetworks WHERE id = %s", (req.context['id']), )
+            server = self.db.query("SELECT * FROM mynetworks WHERE id = %s", (str(request['id']),) )
             domain = self.db.query("SELECT * FROM virtual_domains WHERE id = %s", (domain_id,))
             if not server:
                 raise RError(30)

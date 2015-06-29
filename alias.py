@@ -39,7 +39,7 @@ class RAlias:
 
 class RAliasModify:
     def __init__(self):
-        self.db = RDataBase
+        self.db = RDataBase()
 
     @utils.require_login
     @utils.require_domain_owner

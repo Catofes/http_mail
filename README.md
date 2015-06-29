@@ -167,7 +167,8 @@ Show all the mail servers in the system.
 
 ###DKIM Settings
 
-You can bind your dkim key to a domain. You can add one or replace one. The first number in this api is domain id. When you query your record, not key but sha512(key) will returned.
+You can bind your dkim key to a domain. You can add one or replace one. The first number in this api is domain id. 
+When you query your record, not key but sha512(key) will returned.
 
     #List a dkim record
     GET:    /dkim/1?token=b5f1147824e37b8b
@@ -180,11 +181,74 @@ You can bind your dkim key to a domain. You can add one or replace one. The firs
    
 ###BCC Settings
 
-Show the BCC settings of the mail server. You need level upon 5. Please read postfix manual before add record. 
+Show the BCC settings of the mail server. You need level upon 5. Please read postfix manual before add records. 
+The region means which servers this record applies to. You can use server mark, region mark or default mark in this field. 
+You need put your email username(without @domain.tld) in source field and put a intact email address in destination field.
+If you put nothing in your username. All mails sent to your domain will be bcc to your destination.
+The first number in the url is domain id and the second one is bcc record id.
 
-
+    #List all bcc settings
+    GET:    /bcc/1?token=b5f1147824e37b8b
+    RESP:   {"result": [{"source": "r@aaa.com", "region": "SFDO", "destination": "r+relaycn@aaa.com", "id": 1}]}
+    
+    #Add a bcc settings
+    POST:   /bcc/1?token=b5f1147824e37b8b
+    BODY:   {"source":"abc","destination":"bb@gmail.com","region":"SFDO"}
+    
+    #List a bcc settings
+    GET:    /bcc/1/4?token=f0872cbdc28b173
+    RESP:   {"result": {"source": "abc@aaa.com", "region": "SFDO", "destination": "bb@gmail.com", "id": 4}}
+    
+    #Delete a bcc settings
+    DELETE: /bcc/1/4?token=f0872cbdc28b173
+    
+    
 ###Alias Settings
 
+Shows and modifies alias settings of a domain. Need level 5 above. 
+The first number in the url is domain id and the second one is alias record id.
+
+    #List all alias settings
+    GET:    /alias/1?token=b5f1147824e37b8b
+    RESP:   {"result": [{"source": "sdf@aaa.com", "destination": "haha@gmail.com", "id": 8}]}
+    
+    #Add a alias settings
+    POST:   /alias/1?token=f0872cbdc28b173
+    BODY:   {"source":"sdf","destination":"haha@gmail.com"}
+    
+    #List a alias settings
+    GET:    /alias/1/8?token=f0872cbdc28b173
+    RESP:   {"result": {"source": "sdf@aaa.com", "destination": "haha@gmail.com", "id": 8}}
+    
+    #Delete a alias settings
+    DELETE: /alias/1/8?token=f0872cbdc28b173
 
 ###Transport Settings
 
+Shows and modifies transport settings of a domain. Please read postfix transport manual.
+Need level 5 above. You need put "username@" in source field or put nothing in it.
+
+    #List all transport settings
+    GET:    /transport/2?token=b5f1147824e37b8b
+    RESP:   {"result": [{"source": "aaa.com", "region": "SFDO", "destination": "lmtp:unix:private/dovecot-lmtp", "id": 4}, {"source": "aaa.com", "region": "0default", "destination": "smtp:[xxx.domain.tld]", "id": 5}]}
+    
+    #Add a transport settings
+    POST:   /transport/2?token=f0872cbdc28b173
+    BODY:   {"source":"k@","destination":"smtp:[smtp.google.com]","region":"0default"}
+    
+    #List a transport settings
+    GET:    /transport/2/14?token=f0872cbdc28b173
+    RESP:   {"result": {"source": "k@aaa.com", "region": "0default", "destination": "smtp:[smtp.google.com]", "id": 14}}
+    
+    #Delete a transport settings
+    DELETE: /transport/2/14?token=f0872cbdc28b173
+    
+####Default Transport Settings
+
+Add some default transport settings. This will delete all your transport settings of a domain. Be careful.
+
+    #Get what you can do 
+    GET:    /transport_default
+    
+    #Do Something. First number is domain id and second number is operate id.
+    POST:   /transport_default/1/1?token=f0872cbdc28b173

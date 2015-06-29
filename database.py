@@ -82,7 +82,7 @@ class RDataBase(Singleton):
             print "MySQL Error when begin an execute."
             db.close()
             raise RError(1)
-        return RDataBaseConnection(id)
+        return RDataBaseConnection(db)
 
     def commit(self, con):
         return con.commit()
