@@ -266,3 +266,51 @@ Add some default transport settings. This will delete all your transport setting
     
     #Do Something. First number is domain id and second number is operate id.
     POST:   /transport_default/1/1?token=f0872cbdc28b173
+    
+    
+    
+##如何使用这套系统
+
+*拥有一个域名。
+*获得网站的邀请码。
+
+请联系管理员获取。
+
+*在网站注册一个管理账户。
+
+注意，本管理账户更改密码时候需要您的邀请码。请妥善保管。
+
+*登陆网站并添加一个域名。
+*为这个域名添加一个邮箱用户。
+*前往您域名的dns服务商并修改您的域名的mx记录。
+
+您可以通过 `server api` 获得系统内邮件服务器的地址。选自一个作为您的mx记录地址即可。
+
+*在您的客户端上设置smtp以及imap/pop3来使用邮箱服务。
+
+服务器地址就是您mx记录添加的地址，用户名为完整的邮箱地址。smtp端口为587协议为STARTSSL，pop3端口为995协议为SSL/TLS，IMAP端口为993协议为SSL/TLS。
+
+###反垃圾设置。
+
+如果您要是用该系统发送邮件，请设置spf记录以及dkim记录。
+
+在您的dns服务商处添加TXT记录。
+
+    @ TXT v=spf1 include:_spf.catofes.com ~all
+    
+您可以自己设置您的spf记录。
+
+dkim记录请您自己生成证书后利用api上传，然后添加对应的dns记录即可。
+
+###转发（别名）设置
+
+请参考postfix中alias的选项。你可以利用api上传您的设置。注意，postfix中别名先于用户处理，即错误的别名设置可能使您的用户收不到任何邮件。
+
+###BCC 设置
+
+类似于别名，BCC应该优先于alias。您可以参考postfix中recipient_bcc选项
+
+###路由设置
+
+请参考Postfix中transport选项。
+
