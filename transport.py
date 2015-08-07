@@ -30,7 +30,7 @@ class RTransport:
             raise RError(20)
         if 'region' not in request.keys():
             raise RError(20)
-        if not (re.match('^[a-z0-9A-Z_\+]{1,60}@$', request['source']) or request['source'] == ""):
+        if not (re.match('^[a-z0-9A-Z_\+\.]{1,60}@$', request['source']) or request['source'] == ""):
             raise RError(13)
         domain = self.db.query("SELECT * FROM virtual_domains WHERE id = %s", (domain_id,))
         self.db.execute("INSERT INTO transport_domains(domain_id, source, destination, region) VALUES (%s,%s,%s,%s)",
