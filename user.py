@@ -28,7 +28,7 @@ class RUser:
         request = req.context['request']
         if 'username' not in request.keys():
             raise RError(20)
-        if not re.match('^[a-z0-9A-Z_]{1,60}$', request['username']):
+        if not re.match('^[a-z0-9A-Z][a-z0-9A-Z_\+\.]{0,60}$', request['username']):
             raise RError(13)
         if 'password' not in request.keys():
             raise RError(14)
