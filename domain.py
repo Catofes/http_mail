@@ -13,7 +13,10 @@ class RDomain:
 
     @utils.require_login
     def on_get(self, req, resp, user):
-        result = self.db.query("SELECT id, name FROM virtual_domains WHERE admin_user_id = %s", (user.info.id,))
+        if user.info.level == 100:
+            result = self.db.query("SELECT id, name FROM virtual_domains ")
+        else:
+            result = self.db.query("SELECT id, name FROM virtual_domains WHERE admin_user_id = %s", (user.info.id,))
         req.context['result'] = {'result': result}
         resp.status = falcon.HTTP_200
 
