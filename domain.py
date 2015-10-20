@@ -30,7 +30,7 @@ class RDomain:
             raise RError(7)
         if self.db.query("SELECT id FROM virtual_domains WHERE name = %s", (request['domain'],)):
             raise RError(8)
-        if not re.match('^[a-zA-Z0-9][-a-zA-Z0-9]{0,62}\.[a-zA-Z0-9][-a-zA-Z0-9]{0,62}$', request['domain']):
+        if not re.match('^([a-zA-Z0-9][-a-zA-Z0-9]{0,62}\.){1,5}[a-zA-Z0-9][-a-zA-Z0-9]{0,62}$', request['domain']):
             raise RError(9)
         self.db.execute("INSERT INTO virtual_domains (name, admin_user_id) VALUES (%s, %s)",
                         (request['domain'], user.info.id))
