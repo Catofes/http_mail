@@ -28,10 +28,12 @@ class RAdminUser():
         self.config = RConfig()
         if token:
             self.info.token = token
-        if token != "":
+        if self.info.token != "":
             self.login_by_token()
 
     def login_by_token(self):
+        if not self.info.token:
+            return False
         if self.session.contains(self.info.token):
             self.info = self.session.get(self.info.token)
             if self.info.expired_time < time.time():
@@ -89,7 +91,6 @@ class RAdminUser():
             raise RError(0)
         result = self.db.execute("UPDATE invite_codes SET used = 1 WHERE code = %s", (code,))
         return True
-
 
     def reset_password(self, code="", password=""):
         if code == "" or password == "":
