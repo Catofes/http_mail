@@ -2,12 +2,12 @@ __author__ = 'herbertqiao'
 
 import falcon
 import utils
-from database import RDataBase
+from database import RDataBasePool
 
 
 class RServer:
     def __init__(self):
-        self.db = RDataBase()
+        self.db = RDataBasePool()
 
     @utils.require_login
     def on_get(self, req, resp, user):

@@ -1,14 +1,14 @@
 __author__ = 'herbertqiao'
 
 import utils
-from database import RDataBase
+from database import RDataBasePool
 from error import RError
 import re
 
 
 class RBcc:
     def __init__(self):
-        self.db = RDataBase()
+        self.db = RDataBasePool()
 
     @utils.require_login
     @utils.require_domain_owner
@@ -43,7 +43,7 @@ class RBcc:
 
 class RBccModify:
     def __init__(self):
-        self.db = RDataBase()
+        self.db = RDataBasePool()
 
     @utils.require_login
     @utils.require_domain_owner

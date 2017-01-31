@@ -1,14 +1,14 @@
 __author__ = 'herbertqiao'
 
 import utils
-from database import RDataBase
+from database import RDataBasePool
 from error import RError
 import re
 
 
 class RAlias:
     def __init__(self):
-        self.db = RDataBase()
+        self.db = RDataBasePool()
 
     @utils.require_login
     @utils.require_domain_owner
@@ -39,7 +39,7 @@ class RAlias:
 
 class RAliasModify:
     def __init__(self):
-        self.db = RDataBase()
+        self.db = RDataBasePool()
 
     @utils.require_login
     @utils.require_domain_owner

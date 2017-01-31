@@ -1,10 +1,9 @@
 __author__ = 'herbertqiao'
 
 from admin import RAdminUser
-from database import RDataBase
-import utils
 from error import RError
 import re
+import utils
 
 
 class RLogin:

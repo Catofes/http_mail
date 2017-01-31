@@ -3,7 +3,7 @@ __author__ = 'herbertqiao'
 from session import RMemorySessionStore
 import time
 from config import RConfig
-from database import RDataBase
+from database import RDataBasePool
 import hashlib
 from error import RError
 import re
@@ -23,7 +23,7 @@ class RAdminUserInfo():
 class RAdminUser():
     def __init__(self, token=None):
         self.session = RMemorySessionStore()
-        self.db = RDataBase()
+        self.db = RDataBasePool()
         self.info = RAdminUserInfo()
         self.config = RConfig()
         if token:
@@ -47,7 +47,7 @@ class RAdminUser():
         if username == "" or password == "" or token == "":
             raise RError(20)
         password = hashlib.sha512(password + self.config.password_salt).hexdigest()[0: 64]
-        result = self.db.query("SELECT * FROM admin_user WHERE username=%s AND password=%s", (username, password))
+        result = self.db.query("SELECT * FROM admin_users WHERE username=%s AND password=%s", (username, password))
         if not result:
             raise RError(25)
         self.info.id = result[0]['id']
@@ -69,7 +69,7 @@ class RAdminUser():
             return False
         if self.info.id <= 0:
             return False
-        result = self.db.query("SELECT * FROM admin_user WHERE  id = %s", (self.info.id,))
+        result = self.db.query("SELECT * FROM admin_users WHERE  id = %s", (self.info.id,))
         if not result:
             return False
         self.info.username = result[0]['username']
@@ -82,10 +82,10 @@ class RAdminUser():
         if code == "" or password == "" or username == "":
             raise RError(20)
         password = hashlib.sha512(password + self.config.password_salt).hexdigest()[0: 64]
-        if self.db.query("SELECT * FROM admin_user WHERE username = %s", (username,)):
+        if self.db.query("SELECT * FROM admin_users WHERE username = %s", (username,)):
             raise RError(19)
         result = self.db.execute(
-            "INSERT INTO admin_user(username, password, level, invite_code_id) "
+            "INSERT INTO admin_users(username, password, level, invite_code_id) "
             "VALUES(%s,%s,1, (SELECT id FROM invite_codes WHERE code = %s))", (username, password, code))
         if not result:
             raise RError(0)
@@ -97,6 +97,6 @@ class RAdminUser():
             raise RError(20)
         password = hashlib.sha512(password + self.config.password_salt).hexdigest()[0: 64]
         result = self.db.execute(
-            "UPDATE admin_user SET password = %s WHERE invite_code_id in (SELECT id FROM invite_codes WHERE code = %s)",
+            "UPDATE admin_users SET password = %s WHERE invite_code_id in (SELECT id FROM invite_codes WHERE code = %s)",
             (password, code))
         return True

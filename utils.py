@@ -1,7 +1,7 @@
 __author__ = 'herbertqiao'
 
 from error import RError
-from database import RDataBase
+from database import RDataBasePool
 from admin import RAdminUser
 import os
 
@@ -11,7 +11,7 @@ def require_codes(used=0):
         def check_login(*args, **kwargs):
             if 'code' not in args[1].params.keys():
                 raise RError(5)
-            db = RDataBase()
+            db = RDataBasePool()
             if not db.query("SELECT * FROM invite_codes WHERE code = %s AND used = %s", (args[1].params['code'], used)):
                 raise RError(6)
             func(*args, code=args[1].params['code'], **kwargs)
@@ -43,7 +43,7 @@ def require_domain_owner(func):
             raise RError(23)
         if user.info.level == 100:
             return func(*args, **kwargs)
-        db = RDataBase()
+        db = RDataBasePool()
         if not db.query("SELECT * FROM virtual_domains WHERE id = %s AND admin_user_id = %s",
                         (kwargs['domain_id'], kwargs['user'].info.id)):
             raise RError(24)

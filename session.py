@@ -3,6 +3,7 @@ from repoze.lru import LRUCache
 from config import RConfig
 from singleton import Singleton
 
+
 class RMemorySessionStore(Singleton):
     def __init__(self):
         if hasattr(self, '_init'):
@@ -25,4 +26,3 @@ class RMemorySessionStore(Singleton):
 
     def contains(self, session_id):
         return self._cache.get(session_id) is not None
-

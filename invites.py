@@ -2,8 +2,6 @@ __author__ = 'herbertqiao'
 
 import falcon
 import utils
-from error import RError
-from database import RDataBase
 
 
 class RInvites():

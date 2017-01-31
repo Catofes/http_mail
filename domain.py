@@ -4,12 +4,12 @@ import falcon
 import utils
 import re
 from error import RError
-from database import RDataBase
+from database import RDataBasePool
 
 
 class RDomain:
     def __init__(self):
-        self.db = RDataBase()
+        self.db = RDataBasePool()
 
     @utils.require_login
     def on_get(self, req, resp, user):
@@ -41,7 +41,7 @@ class RDomain:
 
 class RDomainModify():
     def __init__(self):
-        self.db = RDataBase()
+        self.db = RDataBasePool()
 
     @utils.require_login
     @utils.require_domain_owner

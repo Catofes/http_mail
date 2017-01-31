@@ -4,20 +4,19 @@ import falcon
 import utils
 import re
 from error import RError
-from database import RDataBase
+from database import RDataBasePool
 
 
 class RUser:
     def __init__(self):
-        self.db = RDataBase()
-
+        self.db = RDataBasePool()
 
     @utils.require_login
     @utils.require_domain_owner
     def on_get(self, req, resp, domain_id, user):
         req.context['result'] = {
             'result': self.db.query('SELECT id, domain_id, email FROM virtual_users WHERE domain_id = %s',
-                                    (domain_id, ))}
+                                    (domain_id,))}
         resp.status = falcon.HTTP_200
 
     @utils.require_login
@@ -45,8 +44,7 @@ class RUser:
 
 class RUserModify:
     def __init__(self):
-        self.db = RDataBase()
-
+        self.db = RDataBasePool()
 
     @utils.require_login
     @utils.require_domain_owner
@@ -56,7 +54,6 @@ class RUserModify:
         if not result:
             raise RError(26)
         req.context['result'] = {'result': result[0]}
-
 
     @utils.require_login
     @utils.require_domain_owner
@@ -69,12 +66,11 @@ class RUserModify:
         if 'password' not in request.keys():
             raise RError(14)
         if not self.db.execute(
-            "UPDATE virtual_users SET password = ENCRYPT(%s, CONCAT('$6$', SUBSTRING(SHA(RAND()), -16))) "
-            "WHERE  domain_id = %s AND id = %s",
-            (request['password'], domain_id, user_id)):
+                "UPDATE virtual_users SET password = ENCRYPT(%s, CONCAT('$6$', SUBSTRING(SHA(RAND()), -16))) "
+                "WHERE  domain_id = %s AND id = %s",
+                (request['password'], domain_id, user_id)):
             raise RError(18)
         resp.status = falcon.HTTP_200
-
 
     @utils.require_login
     @utils.require_domain_owner
@@ -84,4 +80,3 @@ class RUserModify:
         if not self.db.execute("DELETE FROM virtual_users WHERE id = %s AND domain_id = %s", (user_id, domain_id)):
             raise RError(26)
         resp.status = falcon.HTTP_200
-

@@ -1,14 +1,14 @@
 __author__ = 'herbertqiao'
 
 import utils
-from database import RDataBase
+from database import RDataBasePool
 from error import RError
 import re
 
 
 class RTransport:
     def __init__(self):
-        self.db = RDataBase()
+        self.db = RDataBasePool()
 
     @utils.require_login
     @utils.require_domain_owner
@@ -40,7 +40,7 @@ class RTransport:
 
 class RTransportModify:
     def __init__(self):
-        self.db = RDataBase()
+        self.db = RDataBasePool()
 
     @utils.require_login
     @utils.require_domain_owner
@@ -64,7 +64,7 @@ class RTransportModify:
 
 class RTransportDefault:
     def __init__(self):
-        self.db = RDataBase()
+        self.db = RDataBasePool()
 
     @utils.require_login
     def on_get(self, req, resp, user):
@@ -80,7 +80,7 @@ class RTransportDefault:
 
 class RTransportDefaultModify:
     def __init__(self):
-        self.db = RDataBase()
+        self.db = RDataBasePool()
 
     @utils.require_login
     @utils.require_domain_owner
@@ -91,20 +91,18 @@ class RTransportDefaultModify:
             request = req.context['request']
             if 'id' not in request.keys():
                 raise RError(20)
-            server = self.db.query("SELECT * FROM mynetworks WHERE id = %s", (str(request['id']),) )
+            server = self.db.query("SELECT * FROM mynetworks WHERE id = %s", (str(request['id']),))
             domain = self.db.query("SELECT * FROM virtual_domains WHERE id = %s", (domain_id,))
             if not server:
                 raise RError(30)
             cursor = self.db.begin()
             cursor.execute("DELETE FROM transport_domains WHERE domain_id = %s", (domain_id,))
-            cursor.execute(
-                "INSERT INTO transport_domains(domain_id, source, destination, region) VALUES (%s, %s, %s, '0default')",
-                (domain_id, domain[0]['name'], "smtp:[" + server[0]['domain_name'] + "]"))
+            # cursor.execute(
+            #    "INSERT INTO transport_domains(domain_id, source, destination, region) VALUES (%s, %s, %s, '0default')",
+            #    (domain_id, domain[0]['name'], "smtp:[" + server[0]['domain_name'] + "]"))
             cursor.execute(
                 "INSERT INTO transport_domains(domain_id, source, destination, region) VALUES( %s, %s, %s, %s)",
-                (domain_id, domain[0]['name'], "lmtp:unix:private/dovecot-lmtp", server[0]['server_mark']))
+                (domain_id, domain[0]['name'], "lmtp:unix:private/dovecot-lmtp", "0default"))
             cursor.commit()
         else:
             raise RError(31)
-
-

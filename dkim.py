@@ -2,14 +2,14 @@ __author__ = 'herbertqiao'
 
 import falcon
 import utils
-from database import RDataBase
+from database import RDataBasePool
 import hashlib
 from error import RError
 
 
 class RDKIM:
     def __init__(self):
-        self.db = RDataBase()
+        self.db = RDataBasePool()
 
     @utils.require_login
     @utils.require_domain_owner
