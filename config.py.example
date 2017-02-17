@@ -3,6 +3,10 @@ __author__ = 'herbertqiao'
 from singleton import Singleton
 class RConfig(Singleton):
     def __init__(self):
+        if hasattr(self, '_init'):
+            return
+        self._init = True
+        self.password_salt = "in.box.moe"
         self.db_user = "mailserver"
         self.db_passwd="LsK7F9R5RsCrpjdZ"
         self.db_host = "127.0.0.1"

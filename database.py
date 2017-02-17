@@ -71,6 +71,12 @@ class RDataBasePool(singleton.Singleton):
             connect_timeout=3
         )
 
+    def query(self, sql, param):
+        result = self.execute(sql, param)
+        if result:
+            return [{k: v for k, v in r.items()} for r in result]
+        return result
+
     def execute(self, sql, param):
         try:
             db = self._db_pool.getconn()
