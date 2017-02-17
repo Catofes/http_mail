@@ -58,8 +58,6 @@ class RTransportModify:
     def on_delete(self, req, resp, user, domain_id, transport_id):
         result = self.db.execute("DELETE FROM transport_domains WHERE id = %s AND domain_id = %s",
                                  (transport_id, domain_id))
-        if not result:
-            raise RError(18)
 
 
 class RTransportDefault:

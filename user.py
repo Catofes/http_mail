@@ -65,11 +65,10 @@ class RUserModify:
             raise RError(15)
         if 'password' not in request.keys():
             raise RError(14)
-        if not self.db.execute(
+        self.db.execute(
                 "UPDATE virtual_users SET password = ENCRYPT(%s, CONCAT('$6$', SUBSTRING(SHA(RAND()), -16))) "
                 "WHERE  domain_id = %s AND id = %s",
-                (request['password'], domain_id, user_id)):
-            raise RError(18)
+                (request['password'], domain_id, user_id))
         resp.status = falcon.HTTP_200
 
     @utils.require_login
@@ -77,6 +76,5 @@ class RUserModify:
     def on_delete(self, req, resp, domain_id, user_id, user):
         if not user_id:
             raise RError(15)
-        if not self.db.execute("DELETE FROM virtual_users WHERE id = %s AND domain_id = %s", (user_id, domain_id)):
-            raise RError(26)
+        self.db.execute("DELETE FROM virtual_users WHERE id = %s AND domain_id = %s", (user_id, domain_id))
         resp.status = falcon.HTTP_200

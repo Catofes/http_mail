@@ -59,6 +59,4 @@ class RBccModify:
     @utils.require_domain_owner
     @utils.require_level(5)
     def on_delete(self, req, resp, user, domain_id, bcc_id):
-        result = self.db.execute("DELETE FROM recipient_bcc WHERE id = %s AND domain_id = %s", (bcc_id, domain_id))
-        if not result:
-            raise RError(18)
+        self.db.execute("DELETE FROM recipient_bcc WHERE id = %s AND domain_id = %s", (bcc_id, domain_id))

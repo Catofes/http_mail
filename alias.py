@@ -54,7 +54,6 @@ class RAliasModify:
     @utils.require_domain_owner
     @utils.require_level(5)
     def on_delete(self, req, resp, user, domain_id, alias_id):
-        result = self.db.execute("DELETE FROM virtual_aliases WHERE id = %s AND domain_id = %s", (alias_id, domain_id))
-        if not result:
-            raise RError(18)
+        self.db.execute("DELETE FROM virtual_aliases WHERE id = %s AND domain_id = %s", (alias_id, domain_id))
+
 
