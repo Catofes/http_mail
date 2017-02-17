@@ -11,7 +11,7 @@ class RServer:
 
     @utils.require_login
     def on_get(self, req, resp, user):
-        result = self.db.query("SELECT domain_name, server_mark, region_mark, default_mark FROM mynetworks", ())
+        result = self.db.query("SELECT domain_name, server_mark, region_mark, default_mark FROM my_networks", ())
         req.context['result'] = {"result": result}
 
 
