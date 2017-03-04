@@ -37,7 +37,7 @@ class RUser:
             raise RError(17)
         self.db.execute(
             "INSERT INTO virtual_users (domain_id,password, email) VALUES "
-            "(%s, ENCRYPT(%s, CONCAT('$6$', SUBSTRING(SHA(RAND()), -16))), %s)",
+            "(%s, ENCRYPT(%s, GEN_SALT('bf'))",
             (domain_id, request['password'], (request['username'] + "@" + domain[0]['name'])))
         resp.status = falcon.HTTP_200
 
@@ -66,7 +66,7 @@ class RUserModify:
         if 'password' not in request.keys():
             raise RError(14)
         self.db.execute(
-                "UPDATE virtual_users SET password = ENCRYPT(%s, CONCAT('$6$', SUBSTRING(SHA(RAND()), -16))) "
+                "UPDATE virtual_users SET password = ENCRYPT(%s, GEN_SALT('bf')) "
                 "WHERE  domain_id = %s AND id = %s",
                 (request['password'], domain_id, user_id))
         resp.status = falcon.HTTP_200
