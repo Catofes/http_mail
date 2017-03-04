@@ -3,6 +3,9 @@ __author__ = 'herbertqiao'
 import falcon
 import utils
 import re
+import crypt
+import random
+import hashlib
 from error import RError
 from database import RDataBasePool
 
@@ -36,9 +39,10 @@ class RUser:
                          ((request['username'] + "@" + domain[0]['name']),)):
             raise RError(17)
         self.db.execute(
-            "INSERT INTO virtual_users (domain_id,password, email) VALUES "
-            "(%s, CRYPT(%s, GEN_SALT('bf')), %s)",
-            (domain_id, request['password'], (request['username'] + "@" + domain[0]['name'])))
+            "INSERT INTO virtual_users (domain_id, password, email) VALUES (%s, %s, %s)",
+            (domain_id,
+             crypt.crypt(request['password'], '$6$' + hashlib.sha1(str(random.Random().random())).hexdigest()[:16]),
+             (request['username'] + "@" + domain[0]['name'])))
         resp.status = falcon.HTTP_200
 
 
@@ -66,9 +70,9 @@ class RUserModify:
         if 'password' not in request.keys():
             raise RError(14)
         self.db.execute(
-                "UPDATE virtual_users SET password = CRYPT(%s, GEN_SALT('bf')) "
-                "WHERE  domain_id = %s AND id = %s",
-                (request['password'], domain_id, user_id))
+            "UPDATE virtual_users SET password = %s WHERE  domain_id = %s AND id = %s",
+            (crypt.crypt(request['password'], '$6$' + hashlib.sha1(str(random.Random().random())).hexdigest()[:16]),
+             domain_id, user_id))
         resp.status = falcon.HTTP_200
 
     @utils.require_login
