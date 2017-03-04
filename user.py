@@ -37,7 +37,7 @@ class RUser:
             raise RError(17)
         self.db.execute(
             "INSERT INTO virtual_users (domain_id,password, email) VALUES "
-            "(%s, CRYPT(%s, GEN_SALT('bf')), %s",
+            "(%s, CRYPT(%s, GEN_SALT('bf')), %s)",
             (domain_id, request['password'], (request['username'] + "@" + domain[0]['name'])))
         resp.status = falcon.HTTP_200
 
