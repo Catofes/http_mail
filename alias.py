@@ -29,7 +29,7 @@ class RAlias:
             raise RError(20)
         if not re.match('^[a-z0-9A-Z_\+\.]{0,60}$', request['source']):
             raise RError(13)
-        if not re.match('^[a-z0-9A-Z_\+\.]{1,60}@[a-zA-Z0-9][-a-zA-Z0-9]{0,62}\.[a-zA-Z0-9][-a-zA-Z0-9]{0,62}$',
+        if not re.match('^[a-z0-9A-Z_\+\.]{1,60}@([a-zA-Z0-9][-a-zA-Z0-9]{0,62}\.){1,5}[a-zA-Z0-9][-a-zA-Z0-9]{0,62}$',
                         request['destination']):
             raise RError(28)
         domain = self.db.query("SELECT * FROM virtual_domains WHERE id = %s", (domain_id,))
