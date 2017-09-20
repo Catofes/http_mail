@@ -17,6 +17,8 @@ class RDomain:
             result = self.db.query("SELECT id, name FROM virtual_domains", ())
         else:
             result = self.db.query("SELECT id, name FROM virtual_domains WHERE admin_user_id = %s", (user.info.id,))
+        if result == "":
+            result = []
         req.context['result'] = {'result': result}
         resp.status = falcon.HTTP_200
 
