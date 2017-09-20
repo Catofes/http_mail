@@ -1,4 +1,4 @@
-##Required
+## Required
 
 python 2.7
 falcon
@@ -7,17 +7,17 @@ MySQLdb
 
 NOT WORKED IN PYTHON 3
 
-##RUN
+## RUN
 
 python route.py
 
-##API
+## API
 
-###Common
+### Common
 
 The Request must encode in JSON format. And all the api will return JSON if there is something needed to be returned.
 
-####Error Code:
+#### Error Code:
 
 If everything worked perfect, a HTTP 200 will returned. All other HTTP STATUS CODE means some errors. 
 A error code and a illustrate will be returned. Error codes are shown below.
@@ -92,20 +92,20 @@ A error code and a illustrate will be returned. Error codes are shown below.
     }
 
 
-###Invite
+### Invite
 
 Check whether the invite code is available.
 
     GET /invite?code=123
 
-###Register
+### Register
 
 Register a new user. You need send username and password in body with invite code in url parameter.
 
     POST:   /register?code=123
     BODY:   {"username":"catofes","password":"321"}
     
-###Login
+### Login
 
 A token(16-char) will returned if you login successfully. The token will expired in 24h. You need your invite code to change your password.
 
@@ -124,7 +124,7 @@ A token(16-char) will returned if you login successfully. The token will expired
     PUT:    /login?code=123
     BODY:   {"password":"321"}
 
-###Domains
+### Domains
 
 You can list your domains, add domain or delete domain. When you list a domain or delete it, you need use your domain id instead of number 18.
 
@@ -145,7 +145,7 @@ You can list your domains, add domain or delete domain. When you list a domain o
     DELETE: /domain/18?token=865d54814424abbe
     
 
-###Users
+### Users
 
 Modify email users belong to a domain. You can list users, add user, delete user or change user's password.
 The first number in this api means domain id and the second one means user id.
@@ -170,7 +170,7 @@ The first number in this api means domain id and the second one means user id.
     DELETE: /user/18/20?token=865d54814424abbe
     
 
-###Servers
+### Servers
 
 Show all the mail servers in the system. 
 
@@ -179,7 +179,7 @@ Show all the mail servers in the system.
     RESP:   {"result": [{"default_mark": "0default", "server_mark": "CNAL", "domain_name": "a.b.com", "region_mark": "3CN"}]
     
 
-###DKIM Settings
+### DKIM Settings
 
 You can bind your dkim key to a domain. You can add one or replace one. The first number in this api is domain id. 
 When you query your record, not key but sha512(key) will returned.
@@ -193,7 +193,7 @@ When you query your record, not key but sha512(key) will returned.
     BODY:   {"selector":"ppp", "private_key":"xxx"}
     
    
-###BCC Settings
+### BCC Settings
 
 Show the BCC settings of the mail server. You need level upon 5. Please read postfix manual before add records. 
 The region means which servers this record applies to. You can use server mark, region mark or default mark in this field. 
@@ -217,7 +217,7 @@ The first number in the url is domain id and the second one is bcc record id.
     DELETE: /bcc/1/4?token=f0872cbdc28b173
     
     
-###Alias Settings
+### Alias Settings
 
 Shows and modifies alias settings of a domain. Need level 5 above. 
 The first number in the url is domain id and the second one is alias record id.
@@ -237,7 +237,7 @@ The first number in the url is domain id and the second one is alias record id.
     #Delete a alias settings
     DELETE: /alias/1/8?token=f0872cbdc28b173
 
-###Transport Settings
+### Transport Settings
 
 Shows and modifies transport settings of a domain. Please read postfix transport manual.
 Need level 5 above. You need put "username@" in source field or put nothing in it.
@@ -257,7 +257,7 @@ Need level 5 above. You need put "username@" in source field or put nothing in i
     #Delete a transport settings
     DELETE: /transport/2/14?token=f0872cbdc28b173
     
-####Default Transport Settings
+#### Default Transport Settings
 
 Add some default transport settings. This will delete all your transport settings of a domain. Be careful.
 
@@ -269,7 +269,7 @@ Add some default transport settings. This will delete all your transport setting
     
     
     
-##如何使用这套系统
+## 如何使用这套系统
 
 *拥有一个域名。
 *获得网站的邀请码。
@@ -290,7 +290,7 @@ Add some default transport settings. This will delete all your transport setting
 
 服务器地址就是您mx记录添加的地址，用户名为完整的邮箱地址。smtp端口为587协议为STARTSSL，pop3端口为995协议为SSL/TLS，IMAP端口为993协议为SSL/TLS。
 
-###反垃圾设置。
+### 反垃圾设置。
 
 如果您要是用该系统发送邮件，请设置spf记录以及dkim记录。
 
@@ -302,15 +302,15 @@ Add some default transport settings. This will delete all your transport setting
 
 dkim记录请您自己生成证书后利用api上传，然后添加对应的dns记录即可。
 
-###转发（别名）设置
+### 转发（别名）设置
 
 请参考postfix中alias的选项。你可以利用api上传您的设置。注意，postfix中别名先于用户处理，即错误的别名设置可能使您的用户收不到任何邮件。
 
-###BCC 设置
+### BCC 设置
 
 类似于别名，BCC应该优先于alias。您可以参考postfix中recipient_bcc选项
 
-###路由设置
+### 路由设置
 
 请参考Postfix中transport选项。
 
