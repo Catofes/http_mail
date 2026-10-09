@@ -1,0 +1,10 @@
+.git
+legacy
+testdata
+scripts
+config.json
+config.py
+http_mail
+*_test.go
+dist
+.github

@@ -1,0 +1,12 @@
+{
+  "password_salt": "in.box.moe",
+  "db_user": "mailserver",
+  "db_passwd": "replace-with-your-existing-database-password",
+  "db_host": "127.0.0.1",
+  "db_port": 5432,
+  "db_db": "mailserver",
+  "db_mincached": 5,
+  "db_maxconnections": 40,
+  "session_cache_size": 1000,
+  "db_sslmode": "prefer"
+}

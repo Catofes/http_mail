@@ -3,3 +3,6 @@
 config.py
 *.swp
 /__pycache__/
+/http_mail
+/config.json
+/dist/

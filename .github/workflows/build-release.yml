@@ -1,0 +1,248 @@
+name: Build And Release
+
+on:
+  pull_request:
+  push:
+    branches: [main, master]
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: build-release-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ !startsWith(github.ref, 'refs/tags/') }}
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+jobs:
+  build:
+    name: Check And Build Linux Binaries
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: http_mail_test
+          POSTGRES_PASSWORD: http_mail_test
+          POSTGRES_DB: http_mail_test
+        ports:
+          - 5432/tcp
+        options: >-
+          --health-cmd "pg_isready -U http_mail_test -d http_mail_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      - name: Check Go code
+        run: make check
+
+      - name: Check PostgreSQL API compatibility
+        env:
+          HTTP_MAIL_TEST_DSN: host=127.0.0.1 port=${{ job.services.postgres.ports['5432'] }} user=http_mail_test password=http_mail_test dbname=http_mail_test sslmode=disable
+        run: make integration
+
+      - name: Build binaries and release assets
+        run: make build release
+
+      - name: Verify release checksums
+        working-directory: dist
+        run: sha256sum --check SHA256SUMS
+
+      - name: Upload release assets
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-assets
+          path: dist/*
+          if-no-files-found: error
+          retention-days: 7
+
+  docker-build:
+    name: Build And Check Docker (${{ matrix.arch }})
+    needs: build
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      packages: write
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: linux/amd64
+            runner: ubuntu-24.04
+            arch: amd64
+          - platform: linux/arm64
+            runner: ubuntu-24.04-arm
+            arch: arm64
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Lowercase image name
+        run: echo "IMAGE_NAME=${IMAGE_NAME,,}" >> "$GITHUB_ENV"
+
+      - name: Setup Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Extract Docker metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+
+      - name: Build local image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          platforms: ${{ matrix.platform }}
+          load: true
+          tags: http_mail:ci
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha,scope=http-mail-${{ matrix.arch }}
+          cache-to: type=gha,mode=max,scope=http-mail-${{ matrix.arch }}
+
+      - name: Check image runtime
+        run: make docker-check IMAGE=http_mail:ci
+
+      - name: Log in to GHCR
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Push image by digest
+        if: startsWith(github.ref, 'refs/tags/')
+        id: publish
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          platforms: ${{ matrix.platform }}
+          push: true
+          labels: ${{ steps.meta.outputs.labels }}
+          outputs: type=image,name=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }},push-by-digest=true,name-canonical=true
+
+      - name: Export digest
+        if: startsWith(github.ref, 'refs/tags/')
+        env:
+          IMAGE_DIGEST: ${{ steps.publish.outputs.digest }}
+        run: |
+          mkdir -p /tmp/digests
+          touch "/tmp/digests/${IMAGE_DIGEST#sha256:}"
+
+      - name: Upload digest
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: actions/upload-artifact@v4
+        with:
+          name: digests-${{ matrix.arch }}
+          path: /tmp/digests/*
+          if-no-files-found: error
+          retention-days: 1
+
+  docker-manifest:
+    name: Publish Multi-Architecture Image
+    needs: docker-build
+    if: startsWith(github.ref, 'refs/tags/')
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Download digests
+        uses: actions/download-artifact@v4
+        with:
+          pattern: digests-*
+          merge-multiple: true
+          path: /tmp/digests
+
+      - name: Lowercase image name
+        run: echo "IMAGE_NAME=${IMAGE_NAME,,}" >> "$GITHUB_ENV"
+
+      - name: Setup Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract Docker tags
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          flavor: latest=false
+          tags: |
+            type=ref,event=tag
+            type=sha
+            type=raw,value=latest,enable=${{ !contains(github.ref_name, '-') }}
+
+      - name: Create and verify manifest
+        working-directory: /tmp/digests
+        run: |
+          mapfile -t image_tags < <(jq -r '.tags[]' <<< "$DOCKER_METADATA_OUTPUT_JSON")
+          tag_args=()
+          for tag in "${image_tags[@]}"; do
+            tag_args+=(--tag "$tag")
+          done
+          shopt -s nullglob
+          digest_files=(*)
+          test "${#digest_files[@]}" -eq 2
+          sources=()
+          for digest in "${digest_files[@]}"; do
+            [[ "$digest" =~ ^[a-f0-9]{64}$ ]]
+            sources+=("$REGISTRY/$IMAGE_NAME@sha256:$digest")
+          done
+          docker buildx imagetools create "${tag_args[@]}" "${sources[@]}"
+          docker buildx imagetools inspect "${image_tags[0]}" --raw > /tmp/http-mail-manifest.json
+          jq -e '[.manifests[].platform | select(.os == "linux") | .architecture] | unique == ["amd64", "arm64"]' /tmp/http-mail-manifest.json
+
+  release:
+    name: Publish GitHub Release
+    needs: [build, docker-manifest]
+    if: startsWith(github.ref, 'refs/tags/')
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download release assets
+        uses: actions/download-artifact@v4
+        with:
+          name: release-assets
+          path: dist
+
+      - name: Verify release checksums
+        working-directory: dist
+        run: sha256sum --check SHA256SUMS
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          body_path: ${{ hashFiles(format('docs/releases/{0}.md', github.ref_name)) != '' && format('docs/releases/{0}.md', github.ref_name) || '' }}
+          generate_release_notes: true
+          prerelease: ${{ contains(github.ref_name, '-') }}
+          make_latest: ${{ !contains(github.ref_name, '-') }}
+          fail_on_unmatched_files: true
+          files: dist/*
