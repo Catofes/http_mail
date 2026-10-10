@@ -83,9 +83,7 @@ func (a *api) defaultTransport(r *request) (any, error) {
 	if err := requireFields(obj, "id"); err != nil {
 		return nil, err
 	}
-	// Both table names are intentional: server.py used my_networks, while this
-	// endpoint used mynetworks. Keep existing tables/views and actual behavior.
-	server, err := a.db.query(r.Context(), "SELECT * FROM mynetworks WHERE id = $1", fmt.Sprint(obj["id"]))
+	server, err := a.db.query(r.Context(), "SELECT * FROM my_networks WHERE id = $1", fmt.Sprint(obj["id"]))
 	if err != nil {
 		return nil, err
 	}

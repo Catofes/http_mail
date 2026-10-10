@@ -78,7 +78,7 @@ func TestPostgresCompatibility(t *testing.T) {
 	}{{"root", 100}, {"owner", 1}, {"other", 1}, {"power", 5}, {"notroot", 101}} {
 		exec("INSERT INTO admin_users(username,password,level) VALUES ($1,$2,$3)", user.name, adminPassword("321", "in.box.moe"), user.level)
 	}
-	exec("INSERT INTO mynetworks(domain_name,server_mark,region_mark,default_mark) VALUES ('mx.example.com','SFDO','3CN','0default')")
+	exec("INSERT INTO my_networks(domain_name,server_mark,region_mark,default_mark) VALUES ('mx.example.com','SFDO','3CN','0default')")
 	a := newAPI(&postgresStore{db}, config{PasswordSalt: "in.box.moe", SessionCacheSize: 1000})
 	call := func(method, path, token, body string) *httptest.ResponseRecorder {
 		t.Helper()

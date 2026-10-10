@@ -27,7 +27,7 @@ make build
 - 管理账户密码仍为 `sha512(password + password_salt)` 的十六进制结果前 64 个字符；邮箱密码仍为 `$6$` SHA512-crypt，默认 5000 轮、16 字符盐，保持 Postfix / Dovecot 使用的密码格式。
 - token 仍通过 URL 查询参数传递。保留原代码的十六进制 token 格式（最多 16 字符），内存缓存和固定 24 小时有效期。重启服务后需要重新登录；修改密码不会主动清除现有会话。
 - 保留域名所有权检查，以及只有 `level == 100` 可以越过所有权检查的规则。Alias、BCC、Transport 写入要求 `level >= 5`；DKIM、邮箱用户和默认 Transport 保留原来的权限规则。
-- `/server` 继续读取 `my_networks`，默认路由操作继续读取 `mynetworks`。这两个名字来自旧代码，不自动统一或创建表／视图。
+- `/server` 和默认路由操作均读取生产表 `my_networks`。修正旧代码中默认路由查询 `mynetworks` 的拼写错误，无需修改数据库或创建兼容视图。
 - `/transport_default/{domain_id}/1` 保留实际代码行为：检查服务器 ID 后，事务内清空该域名的 Transport，并写入 `lmtp:unix:private/dovecot-lmtp` / `0default`。下面的历史 API 说明文字保留，操作行为以本条为准。
 
 旧 Python 源码和原 README 保存在 `legacy/`，便于核对和回退，不参与 Go 构建。启动方式与配置文件格式已改变，邮箱数据库无需数据转换。未新增 API、认证机制或邮件功能。
